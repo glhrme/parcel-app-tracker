@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export interface CheckPoint {
   completed: boolean;
@@ -26,8 +27,19 @@ export const TrackingCard: React.FC<TrackingCardProps> = ({
   checkPoints,
   onPress,
 }) => {
+  const handlePress = () => {
+    if (onPress) {
+      onPress();
+    } else {
+      router.push({
+        pathname: '/tracking-details',
+        params: { trackingCode }
+      });
+    }
+  };
+
   return (
-    <View style={styles.card}>
+    <TouchableOpacity style={styles.card} onPress={handlePress} activeOpacity={0.7}>
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
@@ -88,7 +100,7 @@ export const TrackingCard: React.FC<TrackingCardProps> = ({
           <Text style={styles.locationText}>{toLocation}</Text>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 

@@ -224,4 +224,26 @@ export class TrackingRepository {
     const allTrackings = await this.getAllTrackings();
     return allTrackings.slice(0, limit);
   }
+
+  // Busca um tracking específico pelo código
+  async getTrackingByCode(code: string): Promise<ProcessedTracking | null> {
+    const allTrackings = await this.getAllTrackings();
+    return allTrackings.find(tracking => tracking.trackingCode === code) || null;
+  }
+
+  // Atualiza um tracking específico fazendo nova chamada à API
+  async updateTracking(code: string): Promise<ProcessedTracking | null> {
+    try {
+      const response = await this.trackingService.addTracking(code);
+      const processedTracking = this.processParcelResponse(code, response);
+      
+      // Salva o tracking atualizado
+      await AsyncStorage.setItem(code, JSON.stringify(processedTracking));
+      
+      return processedTracking;
+    } catch (error) {
+      console.error('Erro ao atualizar tracking:', error);
+      return null;
+    }
+  }
 }

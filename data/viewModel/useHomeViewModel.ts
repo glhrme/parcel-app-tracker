@@ -24,10 +24,22 @@ export const useHomeViewModel = () => {
         return await repository.exists(code);
     };
 
+    // Busca um tracking específico pelo código
+    const getTrackingByCode = async (code: string): Promise<ProcessedTracking | null> => {
+        return await repository.getTrackingByCode(code);
+    };
+
+    // Atualiza um tracking específico
+    const updateTracking = async (code: string): Promise<ProcessedTracking | null> => {
+        return await repository.updateTracking(code);
+    };
+
     return {
         trackAndSave,
         getAllTrackings,
         getRecentTrackings,
         exists,
+        getTrackingByCode,
+        updateTracking,
     };
 }

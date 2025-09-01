@@ -2,6 +2,7 @@ import { SimpleTrackingItem } from '@/components/SimpleTrackingItem';
 import { TrackingCard } from '@/components/TrackingCard';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -92,8 +93,14 @@ export default function HomeScreen() {
   };
 
   const handleViewAllPress = () => {
-    // TODO: Navegar para tela de listagem completa
-    console.log('Navigate to full list');
+    router.push('/(tabs)/your-shipments');
+  };
+
+  const handleTrackingPress = (trackingCode: string) => {
+    router.push({
+      pathname: '/tracking-details',
+      params: { trackingCode }
+    });
   };
 
   return (
@@ -139,7 +146,7 @@ export default function HomeScreen() {
               fromLocation={currentShipment.fromLocation}
               toLocation={currentShipment.toLocation}
               checkPoints={currentShipment.checkPoints}
-              onPress={() => console.log('Card pressed:', currentShipment.trackingCode)}
+              onPress={() => handleTrackingPress(currentShipment.trackingCode)}
             />
           </View>
         )}
@@ -160,7 +167,7 @@ export default function HomeScreen() {
                 status={tracking.originalData.movements[0].description}
                 date={tracking.originalData.movements[0].date}
                 isDelivered={isDelivered(tracking)}
-                onPress={() => console.log('Item pressed:', tracking.trackingCode)}
+                onPress={() => handleTrackingPress(tracking.trackingCode)}
               />
             ))}
           </View>
