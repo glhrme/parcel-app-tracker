@@ -1,22 +1,28 @@
 {
   "expo": {
-    "name": "parcel-app",
-    "slug": "parcel-app",
+    "name": "Malta Parcel Tracker",
+    "slug": "malta-parcel-tracker",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "parcelapp",
-    "userInterfaceStyle": "automatic",
+    "scheme": "maltaparceltracker",
+    "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "br.com.guisantos.parceltracker"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "br.com.guisantos.parceltracker"
     },
     "web": {
       "bundler": "metro",
@@ -38,6 +44,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "a348df04-464e-416f-80fe-672cc38bb84b"
+      }
+    },
+    "owner": "glhrme"
   }
 }
