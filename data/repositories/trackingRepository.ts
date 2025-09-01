@@ -177,6 +177,15 @@ export class TrackingRepository {
     return item !== null;
   }
 
+  // Verifica se um tracking foi entregue
+  private isDelivered(tracking: ProcessedTracking): boolean {
+    // Verifica se tem código EMI (entregue) ou se todos os checkpoints estão completos
+    const hasDeliveryCode = tracking.originalData.movements.some(m => m.code === 'EMI');
+    const allCheckpointsCompleted = tracking.checkPoints.every(cp => cp.completed);
+    
+    return hasDeliveryCode || allCheckpointsCompleted;
+  }
+
   // Retorna todos os ProcessedTracking salvos
   async getAllTrackings(): Promise<ProcessedTracking[]> {
     const keys = await AsyncStorage.getAllKeys();
@@ -193,8 +202,20 @@ export class TrackingRepository {
       })
       .filter((item): item is ProcessedTracking => item !== null);
 
-    // Ordena por data de adição (mais novo primeiro)
-    parsed.sort((a, b) => b.addedAt - a.addedAt);
+    // Ordena: 1º não entregues (por data), 2º entregues (por data)
+    parsed.sort((a, b) => {
+      const aDelivered = this.isDelivered(a);
+      const bDelivered = this.isDelivered(b);
+      
+      // Se status de entrega é diferente, não entregue vem primeiro
+      if (aDelivered !== bDelivered) {
+        return aDelivered ? 1 : -1;
+      }
+      
+      // Se mesmo status, ordena por data de adição (mais novo primeiro)
+      return b.addedAt - a.addedAt;
+    });
+    
     return parsed;
   }
 

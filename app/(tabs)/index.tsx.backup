@@ -1,9 +1,9 @@
-import { SimpleTrackingItem } from '@/components/SimpleTrackingItem';
 import { TrackingCard } from '@/components/TrackingCard';
+import { SimpleTrackingItem } from '@/components/SimpleTrackingItem';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TextInput, View, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ProcessedTracking } from '../../data/types/processedTracking.type';
 import { useHomeViewModel } from '../../data/viewModel/useHomeViewModel';
@@ -12,7 +12,7 @@ export default function HomeScreen() {
   const [inputValue, setInputValue] = useState("");
   const [allTrackings, setAllTrackings] = useState<ProcessedTracking[]>([]);
   const [isUpdating, setIsUpdating] = useState(false);
-  const { trackAndSave, getAllTrackings } = useHomeViewModel();
+  const { trackAndSave, getAllTrackings, trackAndSave: updateTracking } = useHomeViewModel();
   const insets = useSafeAreaInsets();
 
   // Verifica se um tracking foi entregue
@@ -27,10 +27,16 @@ export default function HomeScreen() {
   const otherShipments = allTrackings.filter(tracking => 
     tracking !== currentShipment
   ).slice(0, 2);
+  const [recentTrackings, setRecentTrackings] = useState<ProcessedTracking[]>([]);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const { trackAndSave, getRecentTrackings, trackAndSave: updateTracking } = useHomeViewModel();
+  const insets = useSafeAreaInsets();
 
-  // Carrega todos os trackings ao entrar
+  // Carrega os 2 mais recentes do localStorage ao entrar
   useEffect(() => {
-    loadAllTrackings();
+    loadRecentTrackings();
+    // Descomente a linha abaixo para limpar o localStorage (apenas uma vez)
+    // clearAllStorage();
   }, []);
 
   // FUNÇÃO PARA LIMPAR TODO O LOCALSTORAGE - USE APENAS QUANDO NECESSÁRIO
@@ -39,21 +45,21 @@ export default function HomeScreen() {
       await AsyncStorage.clear();
       console.log('LocalStorage limpo com sucesso!');
       Alert.alert('Sucesso', 'Todos os dados foram removidos do localStorage');
-      setAllTrackings([]);
+      setRecentTrackings([]);
     } catch (error) {
       console.error('Erro ao limpar localStorage:', error);
       Alert.alert('Erro', 'Falha ao limpar localStorage');
     }
   };
 
-  const loadAllTrackings = async () => {
+  const loadRecentTrackings = async () => {
     try {
-      const trackings = await getAllTrackings();
-      setAllTrackings(trackings);
+      const recent = await getRecentTrackings(2);
+      setRecentTrackings(recent);
       
       // Atualiza em background se houver trackings
-      if (trackings.length > 0) {
-        updateTrackingsInBackground(trackings);
+      if (recent.length > 0) {
+        updateTrackingsInBackground(recent);
       }
     } catch (error) {
       console.error('Erro ao carregar trackings:', error);
@@ -65,11 +71,17 @@ export default function HomeScreen() {
     setIsUpdating(true);
     try {
       const updatePromises = trackings.map(tracking => 
-        trackAndSave(tracking.trackingCode)
+        updateTracking(tracking.trackingCode)
       );
       
       const updatedTrackings = await Promise.all(updatePromises);
-      setAllTrackings(updatedTrackings);
+      
+      // Remove duplicatas ao atualizar
+      const uniqueTrackings = updatedTrackings.filter((tracking, index, self) =>
+        index === self.findIndex(t => t.trackingCode === tracking.trackingCode)
+      );
+      
+      setRecentTrackings(uniqueTrackings.slice(0, 2));
     } catch (error) {
       console.error('Erro ao atualizar trackings:', error);
     } finally {
@@ -81,20 +93,26 @@ export default function HomeScreen() {
   const handleSubmit = async () => {
     if (inputValue.trim()) {
       try {
-        await trackAndSave(inputValue.trim());
+        const newTracking = await trackAndSave(inputValue.trim());
+        
+        // Remove duplicatas e adiciona o novo no início
+        setRecentTrackings(prev => {
+          const filteredTrackings = prev.filter(
+            tracking => tracking.trackingCode !== newTracking.trackingCode
+          );
+          return [newTracking, ...filteredTrackings].slice(0, 2);
+        });
+        
         setInputValue("");
-        // Recarrega lista completa
-        loadAllTrackings();
       } catch (error) {
         console.error('Erro ao buscar tracking:', error);
       }
     }
   };
 
-  const handleViewAllPress = () => {
-    // TODO: Navegar para tela de listagem completa
-    console.log('Navigate to full list');
-  };
+  useEffect(() => {
+    console.log(recentTrackings)
+  }, [recentTrackings]);
 
   return (
     <View style={{ flex: 1 }}>
@@ -105,7 +123,6 @@ export default function HomeScreen() {
           <TextInput
             style={styles.input}
             placeholder='Enter your tracking number'
-            placeholderTextColor="#666"
             value={inputValue}
             onChangeText={setInputValue}
             onSubmitEditing={handleSubmit}
@@ -113,64 +130,33 @@ export default function HomeScreen() {
           />
         </View>
       </View>
-
       <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
         {/* Indicador de atualização */}
         {isUpdating && (
           <View style={styles.updateIndicator}>
             <ActivityIndicator size="small" color="#1976D2" />
-            <Text style={styles.updateText}>Updating...</Text>
+            <Text style={styles.updateText}>Atualizando...</Text>
           </View>
         )}
 
-        {/* Current Shipment Section */}
-        {currentShipment && (
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Current Shipment</Text>
-              <TouchableOpacity onPress={handleViewAllPress}>
-                <Text style={styles.viewAllText}>View All</Text>
-              </TouchableOpacity>
-            </View>
+        {/* Lista dos trackings recentes */}
+        {recentTrackings.length > 0 ? (
+          recentTrackings.map((tracking, index) => (
             <TrackingCard
-              trackingCode={currentShipment.trackingCode}
-              status={currentShipment.originalData.movements[0].description}
-              date={currentShipment.originalData.movements[0].date}
-              fromLocation={currentShipment.fromLocation}
-              toLocation={currentShipment.toLocation}
-              checkPoints={currentShipment.checkPoints}
-              onPress={() => console.log('Card pressed:', currentShipment.trackingCode)}
+              key={tracking.trackingCode}
+              trackingCode={tracking.trackingCode}
+              status={tracking.originalData.movements[0].description}
+              date={tracking.originalData.movements[0].date}
+              fromLocation={tracking.fromLocation}
+              toLocation={tracking.toLocation}
+              checkPoints={tracking.checkPoints}
+              onPress={() => console.log('Card pressed:', tracking.trackingCode)}
             />
-          </View>
-        )}
-
-        {/* Your Shipments Section */}
-        {otherShipments.length > 0 && (
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Your Shipments</Text>
-              <TouchableOpacity onPress={handleViewAllPress}>
-                <Text style={styles.viewAllText}>View All</Text>
-              </TouchableOpacity>
-            </View>
-            {otherShipments.map((tracking) => (
-              <SimpleTrackingItem
-                key={tracking.trackingCode}
-                trackingCode={tracking.trackingCode}
-                status={tracking.originalData.movements[0].description}
-                date={tracking.originalData.movements[0].date}
-                isDelivered={isDelivered(tracking)}
-                onPress={() => console.log('Item pressed:', tracking.trackingCode)}
-              />
-            ))}
-          </View>
-        )}
-
-        {/* Empty State */}
-        {!currentShipment && otherShipments.length === 0 && (
+          ))
+        ) : (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyText}>No shipments found</Text>
-            <Text style={styles.emptySubText}>Add a tracking number above to get started</Text>
+            <Text style={styles.emptyText}>Nenhum tracking encontrado</Text>
+            <Text style={styles.emptySubText}>Adicione um código de rastreamento acima</Text>
           </View>
         )}
       </ScrollView>
@@ -210,6 +196,40 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 32,
   },
+  updateIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#E3F2FD',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginHorizontal: 16,
+    marginBottom: 16,
+  },
+  updateText: {
+    marginLeft: 8,
+    fontSize: 14,
+    color: '#1976D2',
+  },
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 64,
+    paddingHorizontal: 32,
+  },
+  emptyText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#666',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  emptySubText: {
+    fontSize: 14,
+    color: '#999',
+    textAlign: 'center',
+  },
   searchBox: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -229,58 +249,27 @@ const styles = StyleSheet.create({
   searchIcon: {
     marginRight: 8,
   },
-  updateIndicator: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#E3F2FD',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    marginHorizontal: 16,
-    marginBottom: 16,
-  },
-  updateText: {
-    marginLeft: 8,
-    fontSize: 14,
-    color: '#1976D2',
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    marginBottom: 12,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#333',
-  },
-  viewAllText: {
+  searchInput: {
+    flex: 1,
     fontSize: 16,
-    color: '#1976D2',
-    fontWeight: '500',
+    color: '#222',
+    paddingVertical: 4,
+    backgroundColor: 'transparent',
   },
-  emptyState: {
+  titleContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 64,
-    paddingHorizontal: 32,
+    gap: 8,
   },
-  emptyText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#666',
+  stepContainer: {
+    gap: 8,
     marginBottom: 8,
-    textAlign: 'center',
   },
-  emptySubText: {
-    fontSize: 14,
-    color: '#999',
-    textAlign: 'center',
+  reactLogo: {
+    height: 178,
+    width: 290,
+    bottom: 0,
+    left: 0,
+    position: 'absolute',
   },
 });
