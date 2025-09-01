@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { LocalizationProvider } from '../hooks/useLocalization';
 
 export default function RootLayout() {
   const [loaded] = useFonts({
@@ -18,20 +19,22 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <ThemeProvider value={DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen 
-            name="tracking-details" 
-            options={{ 
-              headerShown: false,
-              presentation: 'modal'
-            }} 
-          />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-        <StatusBar style="auto" />
-      </ThemeProvider>
+      <LocalizationProvider>
+        <ThemeProvider value={DefaultTheme}>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen 
+              name="tracking-details" 
+              options={{ 
+                headerShown: false,
+                presentation: 'modal'
+              }} 
+            />
+            <Stack.Screen name="+not-found" />
+          </Stack>
+          <StatusBar style="auto" />
+        </ThemeProvider>
+      </LocalizationProvider>
     </SafeAreaProvider>
   );
 }

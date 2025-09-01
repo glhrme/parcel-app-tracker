@@ -4,18 +4,19 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    RefreshControl,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ProcessedTracking } from '../../data/types/processedTracking.type';
 import { useHomeViewModel } from '../../data/viewModel/useHomeViewModel';
+import { useLocalization } from '../../hooks/useLocalization';
 
 export default function YourShipmentsScreen() {
   const [allTrackings, setAllTrackings] = useState<ProcessedTracking[]>([]);
@@ -25,6 +26,7 @@ export default function YourShipmentsScreen() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'pending' | 'delivered'>('all');
   const { getAllTrackings } = useHomeViewModel();
+  const { t } = useLocalization();
   const insets = useSafeAreaInsets();
 
   // Verifica se um tracking foi entregue
@@ -101,7 +103,7 @@ export default function YourShipmentsScreen() {
     return (
       <View style={[styles.container, styles.centered]}>
         <ActivityIndicator size="large" color="#1976D2" />
-        <Text style={styles.loadingText}>Carregando seus envios...</Text>
+        <Text style={styles.loadingText}>{t.yourShipments.loadingText}</Text>
       </View>
     );
   }
@@ -110,9 +112,9 @@ export default function YourShipmentsScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
-        <Text style={styles.headerTitle}>Your Shipments</Text>
+        <Text style={styles.headerTitle}>{t.yourShipments.title}</Text>
         <Text style={styles.headerSubtitle}>
-          {stats.total} envio{stats.total !== 1 ? 's' : ''} • {stats.pending} pendente{stats.pending !== 1 ? 's' : ''} • {stats.delivered} entregue{stats.delivered !== 1 ? 's' : ''}
+          {t.yourShipments.shipmentCount(stats.total)} • {t.yourShipments.pendingCount(stats.pending)} • {t.yourShipments.deliveredCount(stats.delivered)}
         </Text>
       </View>
 
@@ -122,7 +124,7 @@ export default function YourShipmentsScreen() {
           <Ionicons name="search" size={20} color="#A0A0A0" style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
-            placeholder="Buscar por código, status ou localização..."
+            placeholder={t.yourShipments.searchPlaceholder}
             placeholderTextColor="#A0A0A0"
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -143,7 +145,7 @@ export default function YourShipmentsScreen() {
           onPress={() => setSelectedFilter('all')}
         >
           <Text style={[styles.filterText, selectedFilter === 'all' && styles.filterTextActive]}>
-            Todos ({stats.total})
+            {t.yourShipments.filterAll} ({stats.total})
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -151,7 +153,7 @@ export default function YourShipmentsScreen() {
           onPress={() => setSelectedFilter('pending')}
         >
           <Text style={[styles.filterText, selectedFilter === 'pending' && styles.filterTextActive]}>
-            Pendentes ({stats.pending})
+            {t.yourShipments.filterPending} ({stats.pending})
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -159,7 +161,7 @@ export default function YourShipmentsScreen() {
           onPress={() => setSelectedFilter('delivered')}
         >
           <Text style={[styles.filterText, selectedFilter === 'delivered' && styles.filterTextActive]}>
-            Entregues ({stats.delivered})
+            {t.yourShipments.filterDelivered} ({stats.delivered})
           </Text>
         </TouchableOpacity>
       </View>
@@ -177,16 +179,16 @@ export default function YourShipmentsScreen() {
             <Ionicons name="cube-outline" size={64} color="#D0D0D0" />
             <Text style={styles.emptyTitle}>
               {searchQuery.trim() || selectedFilter !== 'all' 
-                ? 'Nenhum resultado encontrado'
-                : 'Nenhum envio encontrado'
+                ? t.yourShipments.emptySearchTitle
+                : t.yourShipments.emptyTitle
               }
             </Text>
             <Text style={styles.emptySubtitle}>
               {searchQuery.trim() 
-                ? 'Tente uma busca diferente'
+                ? t.yourShipments.emptySearchSubtitle
                 : selectedFilter !== 'all'
-                ? 'Não há envios nesta categoria'
-                : 'Comece adicionando um código de rastreamento na aba Home'
+                ? t.yourShipments.emptyFilterSubtitle
+                : t.yourShipments.emptySubtitle
               }
             </Text>
           </View>
@@ -199,7 +201,7 @@ export default function YourShipmentsScreen() {
               if (!delivered && index === 0 && selectedFilter === 'all') {
                 return (
                   <View key={tracking.trackingCode} style={styles.featuredCard}>
-                    <Text style={styles.featuredLabel}>Em Trânsito</Text>
+                    <Text style={styles.featuredLabel}>{t.yourShipments.inTransit}</Text>
                     <TrackingCard
                       trackingCode={tracking.trackingCode}
                       status={tracking.status}

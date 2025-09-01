@@ -6,8 +6,11 @@ import { HapticTab } from '@/components/default/HapticTab';
 import { IconSymbol } from '@/components/default/ui/IconSymbol';
 import TabBarBackground from '@/components/default/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
+import { useLocalization } from '@/hooks/useLocalization';
 
 export default function TabLayout() {
+  const { t } = useLocalization();
+  
   return (
     <Tabs
       screenOptions={{
@@ -26,15 +29,22 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: t.tabs.home,
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
         }}
       />
       <Tabs.Screen
         name="your-shipments"
         options={{
-          title: 'Your Shipments',
+          title: t.tabs.yourShipments,
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: t.tabs.settings,
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="gear" color={color} />,
         }}
       />
     </Tabs>

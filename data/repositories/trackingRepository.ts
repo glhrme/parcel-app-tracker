@@ -15,15 +15,14 @@ export class TrackingRepository {
     const now = Date.now();
     
     // Extrai informações básicas
-    const lastMovement = response.movements[response.movements.length - 1];
-    const firstMovement = response.movements[0];
+    const firstMovement = response.movements[response.movements.length - 1];
+    const lastMovement = response.movements[0];
     
     // Determina a quantidade de checkpoints baseado nas regras
     const checkpointCount = this.determineCheckpointCount(response);
     
     // Cria checkpoints baseado na quantidade determinada
     const checkPoints = this.createCheckpoints(response, checkpointCount);
-
     return {
       originalData: response,
       trackingCode: code,

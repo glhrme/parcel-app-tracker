@@ -3,15 +3,18 @@ import { StyleSheet } from 'react-native';
 
 import { ThemedText } from '@/components/default/ThemedText';
 import { ThemedView } from '@/components/default/ThemedView';
+import { useLocalization } from '../hooks/useLocalization';
 
 export default function NotFoundScreen() {
+  const { t } = useLocalization();
+
   return (
     <>
       <Stack.Screen options={{ title: 'Oops!' }} />
       <ThemedView style={styles.container}>
-        <ThemedText type="title">This screen does not exist.</ThemedText>
+        <ThemedText type="title">{t.errors.generalError}</ThemedText>
         <Link href="/" style={styles.link}>
-          <ThemedText type="link">Go to home screen!</ThemedText>
+          <ThemedText type="link">{t.home.title}</ThemedText>
         </Link>
       </ThemedView>
     </>

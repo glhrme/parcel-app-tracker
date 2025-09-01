@@ -8,12 +8,14 @@ import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TextInput, Touc
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ProcessedTracking } from '../../data/types/processedTracking.type';
 import { useHomeViewModel } from '../../data/viewModel/useHomeViewModel';
+import { useLocalization } from '../../hooks/useLocalization';
 
 export default function HomeScreen() {
   const [inputValue, setInputValue] = useState("");
   const [allTrackings, setAllTrackings] = useState<ProcessedTracking[]>([]);
   const [isUpdating, setIsUpdating] = useState(false);
   const { trackAndSave, getAllTrackings } = useHomeViewModel();
+  const { t } = useLocalization();
   const insets = useSafeAreaInsets();
 
   // Verifica se um tracking foi entregue
@@ -39,11 +41,11 @@ export default function HomeScreen() {
     try {
       await AsyncStorage.clear();
       console.log('LocalStorage limpo com sucesso!');
-      Alert.alert('Sucesso', 'Todos os dados foram removidos do localStorage');
+      Alert.alert(t.common.success, 'Todos os dados foram removidos do localStorage');
       setAllTrackings([]);
     } catch (error) {
       console.error('Erro ao limpar localStorage:', error);
-      Alert.alert('Erro', 'Falha ao limpar localStorage');
+      Alert.alert(t.common.error, 'Falha ao limpar localStorage');
     }
   };
 
@@ -106,12 +108,12 @@ export default function HomeScreen() {
   return (
     <View style={{ flex: 1 }}>
       <View style={[styles.header, { paddingTop: insets.top + 32 }]}> 
-        <Text style={styles.headerTitle}>Let's Track Your Package</Text>
+        <Text style={styles.headerTitle}>{t.home.title}</Text>
         <View style={styles.searchBox}>
           <Ionicons name="search" size={24} color="#A0A0A0" style={styles.searchIcon} />
           <TextInput
             style={styles.input}
-            placeholder='Enter your tracking number'
+            placeholder={t.home.searchPlaceholder}
             placeholderTextColor="#666"
             value={inputValue}
             onChangeText={setInputValue}
@@ -126,7 +128,7 @@ export default function HomeScreen() {
         {isUpdating && (
           <View style={styles.updateIndicator}>
             <ActivityIndicator size="small" color="#1976D2" />
-            <Text style={styles.updateText}>Updating...</Text>
+            <Text style={styles.updateText}>{t.home.updating}</Text>
           </View>
         )}
 
@@ -134,15 +136,15 @@ export default function HomeScreen() {
         {currentShipment && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Current Shipment</Text>
+              <Text style={styles.sectionTitle}>{t.home.currentShipment}</Text>
               <TouchableOpacity onPress={handleViewAllPress}>
-                <Text style={styles.viewAllText}>View All</Text>
+                <Text style={styles.viewAllText}>{t.home.viewAll}</Text>
               </TouchableOpacity>
             </View>
             <TrackingCard
               trackingCode={currentShipment.trackingCode}
-              status={currentShipment.originalData.movements[0].description}
-              date={currentShipment.originalData.movements[0].date}
+              status={currentShipment.status}
+              date={currentShipment.date}
               fromLocation={currentShipment.fromLocation}
               toLocation={currentShipment.toLocation}
               checkPoints={currentShipment.checkPoints}
@@ -155,9 +157,9 @@ export default function HomeScreen() {
         {otherShipments.length > 0 && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Your Shipments</Text>
+              <Text style={styles.sectionTitle}>{t.home.yourShipments}</Text>
               <TouchableOpacity onPress={handleViewAllPress}>
-                <Text style={styles.viewAllText}>View All</Text>
+                <Text style={styles.viewAllText}>{t.home.viewAll}</Text>
               </TouchableOpacity>
             </View>
             {otherShipments.map((tracking) => (
@@ -176,8 +178,8 @@ export default function HomeScreen() {
         {/* Empty State */}
         {!currentShipment && otherShipments.length === 0 && (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyText}>No shipments found</Text>
-            <Text style={styles.emptySubText}>Add a tracking number above to get started</Text>
+            <Text style={styles.emptyText}>{t.home.emptyTitle}</Text>
+            <Text style={styles.emptySubText}>{t.home.emptySubtitle}</Text>
           </View>
         )}
       </ScrollView>

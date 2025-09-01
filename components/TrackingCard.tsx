@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useLocalization } from '../hooks/useLocalization';
 
 export interface CheckPoint {
   completed: boolean;
@@ -27,6 +28,8 @@ export const TrackingCard: React.FC<TrackingCardProps> = ({
   checkPoints,
   onPress,
 }) => {
+  const { t } = useLocalization();
+
   const handlePress = () => {
     if (onPress) {
       onPress();
@@ -36,6 +39,23 @@ export const TrackingCard: React.FC<TrackingCardProps> = ({
         params: { trackingCode }
       });
     }
+  };
+
+  // Função para localizar o título do checkpoint
+  const getLocalizedCheckpointTitle = (title?: string): string => {
+    if (!title) return '';
+    
+    // Mapeia as chaves de localização
+    const checkpointMap: { [key: string]: string } = {
+      'itemCreated': t.checkpoints.itemCreated,
+      'inTransit': t.checkpoints.inTransit,
+      'outForDelivery': t.checkpoints.outForDelivery,
+      'delivered': t.checkpoints.delivered,
+      'arrivedInCountry': t.checkpoints.arrivedInCountry,
+      'readyForCollection': t.checkpoints.readyForCollection,
+    };
+
+    return checkpointMap[title] || title;
   };
 
   return (
@@ -92,11 +112,11 @@ export const TrackingCard: React.FC<TrackingCardProps> = ({
       {/* Locations */}
       <View style={styles.locations}>
         <View style={styles.location}>
-          <Text style={styles.locationLabel}>From</Text>
+          <Text style={styles.locationLabel}>{t.common.from}</Text>
           <Text style={styles.locationText}>{fromLocation}</Text>
         </View>
         <View style={styles.location}>
-          <Text style={styles.locationLabel}>To</Text>
+          <Text style={styles.locationLabel}>{t.common.to}</Text>
           <Text style={styles.locationText}>{toLocation}</Text>
         </View>
       </View>

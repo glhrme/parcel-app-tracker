@@ -13,6 +13,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ProcessedTracking } from '../data/types/processedTracking.type';
 import { useHomeViewModel } from '../data/viewModel/useHomeViewModel';
+import { useLocalization } from '../hooks/useLocalization';
 
 export default function TrackingDetailsScreen() {
   const { trackingCode } = useLocalSearchParams<{ trackingCode: string }>();
@@ -20,7 +21,25 @@ export default function TrackingDetailsScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { getTrackingByCode, updateTracking } = useHomeViewModel();
+  const { t } = useLocalization();
   const insets = useSafeAreaInsets();
+
+  // Função para localizar o título do checkpoint
+  const getLocalizedCheckpointTitle = (title?: string): string => {
+    if (!title) return '';
+    
+    // Mapeia as chaves de localização
+    const checkpointMap: { [key: string]: string } = {
+      'itemCreated': t.checkpoints.itemCreated,
+      'inTransit': t.checkpoints.inTransit,
+      'outForDelivery': t.checkpoints.outForDelivery,
+      'delivered': t.checkpoints.delivered,
+      'arrivedInCountry': t.checkpoints.arrivedInCountry,
+      'readyForCollection': t.checkpoints.readyForCollection,
+    };
+
+    return checkpointMap[title] || title;
+  };
 
   useEffect(() => {
     loadTrackingDetails();
@@ -102,7 +121,7 @@ export default function TrackingDetailsScreen() {
     return (
       <View style={[styles.container, styles.centered]}>
         <ActivityIndicator size="large" color="#1976D2" />
-        <Text style={styles.loadingText}>Carregando detalhes...</Text>
+        <Text style={styles.loadingText}>{t.trackingDetails.loadingText}</Text>
       </View>
     );
   }
@@ -111,9 +130,9 @@ export default function TrackingDetailsScreen() {
     return (
       <View style={[styles.container, styles.centered]}>
         <Ionicons name="alert-circle" size={64} color="#F44336" />
-        <Text style={styles.errorText}>Tracking não encontrado</Text>
+        <Text style={styles.errorText}>{t.trackingDetails.errorText}</Text>
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Text style={styles.backButtonText}>Voltar</Text>
+          <Text style={styles.backButtonText}>{t.trackingDetails.tryAgain}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -126,7 +145,7 @@ export default function TrackingDetailsScreen() {
         <TouchableOpacity style={styles.backIcon} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Detalhes da Entrega</Text>
+        <Text style={styles.headerTitle}>{t.trackingDetails.title}</Text>
         <TouchableOpacity style={styles.refreshIcon} onPress={handleRefresh}>
           <Ionicons name="refresh" size={24} color="#fff" />
         </TouchableOpacity>
@@ -153,7 +172,7 @@ export default function TrackingDetailsScreen() {
 
         {/* Progresso dos Checkpoints */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Progresso da Entrega</Text>
+          <Text style={styles.sectionTitle}>{t.trackingDetails.progress}</Text>
           <View style={styles.progressContainer}>
             {tracking.checkPoints.map((checkpoint, index) => (
               <View key={index} style={styles.checkpointRow}>
@@ -184,10 +203,10 @@ export default function TrackingDetailsScreen() {
                       { color: checkpoint.completed ? '#333' : '#999' }
                     ]}
                   >
-                    {checkpoint.title || `Checkpoint ${index + 1}`}
+                    {getLocalizedCheckpointTitle(checkpoint.title || `Checkpoint ${index + 1}`)}
                   </Text>
                   <Text style={styles.checkpointDescription}>
-                    {checkpoint.completed ? 'Concluído' : 'Pendente'}
+                    {checkpoint.completed ? t.common.done : t.yourShipments.pending}
                   </Text>
                 </View>
               </View>
@@ -197,7 +216,7 @@ export default function TrackingDetailsScreen() {
 
         {/* Histórico Completo de Movimentos */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Histórico Completo</Text>
+          <Text style={styles.sectionTitle}>{t.trackingDetails.history}</Text>
           <View style={styles.movementsContainer}>
             {tracking.originalData.movements.map((movement, index) => (
               <View key={index} style={styles.movementItem}>
@@ -226,24 +245,24 @@ export default function TrackingDetailsScreen() {
 
         {/* Informações Técnicas */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Informações Técnicas</Text>
+          <Text style={styles.sectionTitle}>{t.trackingDetails.technicalInfo}</Text>
           <View style={styles.technicalInfo}>
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Código de Rastreamento:</Text>
+              <Text style={styles.infoLabel}>{t.trackingDetails.trackingCode}</Text>
               <Text style={styles.infoValue}>{tracking.trackingCode}</Text>
             </View>
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Status:</Text>
+              <Text style={styles.infoLabel}>{t.trackingDetails.status}</Text>
               <Text style={styles.infoValue}>{tracking.status}</Text>
             </View>
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Última Atualização:</Text>
+              <Text style={styles.infoLabel}>{t.trackingDetails.lastUpdate}</Text>
               <Text style={styles.infoValue}>
                 {formatDate(tracking.originalData.movements[0]?.date || '')}
               </Text>
             </View>
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Total de Movimentos:</Text>
+              <Text style={styles.infoLabel}>{t.trackingDetails.totalMovements}</Text>
               <Text style={styles.infoValue}>{tracking.originalData.movements.length}</Text>
             </View>
           </View>
