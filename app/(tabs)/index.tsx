@@ -5,10 +5,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
   const { search } = useHomeViewModel()
-  const [inputValue, setInputValue] = useState("BF244244435MT")
+  const [inputValue, setInputValue] = useState("BF244397396MT")
 
   const onSubmit = useCallback(() => {
-    console.log(search(inputValue))
+    search(inputValue)
   }, [inputValue])
 
   return (

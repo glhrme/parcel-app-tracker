@@ -5,8 +5,12 @@ export const useHomeViewModel = () => {
 
     const search = (async (code: string) => {
         const service = new TrackingService()
-        let response = await service.addTracking(code)
-        return response
+        service.addTracking(code).then((response) => {
+            return response
+        })
+        .catch((error) => {
+            throw error
+        })
     })
 
     return {
