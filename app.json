@@ -1,12 +1,12 @@
 {
   "expo": {
     "name": "Malta Parcel Tracker",
-    "slug": "malta-parcel-tracker",
+    "slug": "parcel-tracker-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "maltaparceltracker",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "platforms": [
       "ios",
@@ -14,7 +14,10 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "br.com.guisantos.parceltracker"
+      "bundleIdentifier": "br.com.guisantos.parceltracker",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
