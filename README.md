@@ -20,7 +20,7 @@
 15. [Telas](#telas)
 16. [Hooks Customizados](#hooks-customizados)
 17. [Guia de Manutenção](#guia-de-manutenção)
-18. [Troubleshooting](#troubleshooting)king App - Documentação Completa
+18. [Troubleshooting](#troubleshooting) - Documentação Completa
 
 ---
 
