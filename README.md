@@ -1,10 +1,4 @@
-# 📦 Parc5. [Estrutura de Dados](#estrutura-de-dados)
-6. [Navegação](#navegação)
-7. [Componentes](#componentes)
-8. [Telas](#telas)
-9. [Hooks Customizados](#hooks-customizados)
-10. [Guia de Manutenção](#guia-de-manutenção)
-11. [Troubleshooting](#troubleshooting)king App - Documentação Completa
+
 
 ## 📋 Índice
 
@@ -20,6 +14,13 @@
 9. [Hooks Customizados](#hooks-customizados)
 10. [Guia de Manutenção](#guia-de-manutenção)
 11. [Troubleshooting](#troubleshooting)
+12. Estrutura de Dados](#estrutura-de-dados)
+13. [Navegação](#navegação)
+14. [Componentes](#componentes)
+15. [Telas](#telas)
+16. [Hooks Customizados](#hooks-customizados)
+17. [Guia de Manutenção](#guia-de-manutenção)
+18. [Troubleshooting](#troubleshooting)king App - Documentação Completa
 
 ---
 
