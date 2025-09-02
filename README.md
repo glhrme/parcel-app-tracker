@@ -14,7 +14,7 @@
 9. [Hooks Customizados](#hooks-customizados)
 10. [Guia de Manutenção](#guia-de-manutenção)
 11. [Troubleshooting](#troubleshooting)
-12. Estrutura de Dados](#estrutura-de-dados)
+12. [Estrutura de Dados](#estrutura-de-dados)
 13. [Navegação](#navegação)
 14. [Componentes](#componentes)
 15. [Telas](#telas)
